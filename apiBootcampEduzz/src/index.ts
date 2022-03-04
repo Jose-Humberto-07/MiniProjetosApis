@@ -1,4 +1,5 @@
 import express, {Request, Response, NextFunction} from "express";
+import errorHandler from "./middlewares/error-handler.middleware";
 import statusRoutes from "./routes/status.toute";
 import userRoute from "./routes/users.route";
 
@@ -15,7 +16,8 @@ app.use(express.urlencoded({extended: true}));
 app.use(userRoute);
 app.use(statusRoutes);
 
-
+// configurações dos Handles de Erro
+app.use(errorHandler);
 
 
 // servidor http

@@ -5,6 +5,7 @@ import userRepository from "../repositories/user.repository";
 import JWT from 'jsonwebtoken';
 import { StatusCodes } from "http-status-codes/build/cjs/status-codes";
 import basicAuthenticationMiddleware from "../middlewares/basic-authentication.middleware";
+import jwtAuthenticationMiddleware from "../middlewares/jwt-authentication.middleware";
 
 
 // "iss"  O domínio da aplicação geradora do token
@@ -45,5 +46,8 @@ authorizationRoute.post('/token', basicAuthenticationMiddleware, async (request:
     }
 });
 
+authorizationRoute.post('/token/validate', jwtAuthenticationMiddleware, (request: Request, response: Response, next: NextFunction) => {
+    response.sendStatus(StatusCodes.OK);
+});
 
 export default authorizationRoute;

@@ -1,38 +1,45 @@
 import { NextFunction, Request, Response, Router } from "express";
 import ForbiddenError from "../models/errors/forbidden.error.model";
+import userRepository from "../repositories/user.repository";
+
+import JWT from 'jsonwebtoken';
+import { StatusCodes } from "http-status-codes/build/cjs/status-codes";
+import basicAuthenticationMiddleware from "../middlewares/basic-authentication.middleware";
+
+
+// "iss"  O domínio da aplicação geradora do token
+// "sub" É o assunto do token, mas é muito utilizado para guardar o ID do usuário
+// "aud" Define quem pode usar o token
+// "exp" Data para expiração do token
+// "nbf" Define uma data para qual o token não pode ser aceito antes dela
+// "iat" Data de criação do token
+// "jti" O id do token
 
 
 
 const authorizationRoute = Router();
 
 
-authorizationRoute.post('/token', (request: Request, response: Response, next: NextFunction) => {
+authorizationRoute.post('/token', basicAuthenticationMiddleware, async (request: Request, response: Response, next: NextFunction) => {
     try {
-        const authorizationHeader = request.headers['authorization'];
+       
+        const user = request.user;
 
-        if (!authorizationHeader) {
-            throw new ForbiddenError('Credenciais não informadas');
-            
+        if (!user) {
+            throw new ForbiddenError('Usuário não informado, por favor tente novamente');
         }
 
+        const jwtPayload = { username: user?.username };
+        const jwtOptions = { subject: user?.uuid };
+        const secretKey = 'my_secret_key';
 
-        const [authenticationType, token] = authorizationHeader.split(' ');
+        const jwt = JWT.sign(jwtPayload, secretKey, jwtOptions);
 
-        if (authenticationType !== 'Basic' || !token) {
-            throw new ForbiddenError('TIpo de autenticação inválida');
-        }
-
-        const tokenContent = Buffer.from(token, 'base64').toString('utf-8');
-
-        const [username, password] = tokenContent.split(':');
+        response.status(StatusCodes.OK).json({ token: jwt });
 
 
-        if (!username || !password) {
-            throw new ForbiddenError('Usuário ou senha não informados');
-        }
+        
 
-
-        console.log(username, password);
     } catch (error) {
         next(error);
     }

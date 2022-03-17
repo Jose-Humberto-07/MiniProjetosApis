@@ -21,5 +21,8 @@ try {
     console.log(error);
     console.log(error.data);
 } finally {
-    console.log("Keep going...");
+    console.log("Keep");
 }
+
+
+
